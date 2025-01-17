@@ -34,7 +34,7 @@ Response body (fail):
 
 ## Log in user
 
-Endpoint: /api/auth/login
+Endpoint: /api/users/auth/login
 
 Method: POST
 
@@ -132,7 +132,7 @@ Response body (fail):
 
 ## Log out
 
-Endpoint: /api/auth/logout
+Endpoint: /api/users/auth/logout
 
 Method: DELETE
 

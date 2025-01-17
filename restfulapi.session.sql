@@ -1,1 +1,1 @@
-DESC addresses;
+SELECT * FROM users;
