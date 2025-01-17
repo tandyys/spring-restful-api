@@ -1,7 +1,5 @@
 package goku.restful.service;
 
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,9 +10,6 @@ import goku.restful.entity.User;
 import goku.restful.repository.UserRepository;
 import goku.restful.security.BCrypt;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 
 @Service
 public class UserService {
@@ -23,14 +18,11 @@ public class UserService {
       private UserRepository userRepository;
 
       @Autowired
-      private Validator validator;
+      private ValidationService validationService;
 
       @Transactional
       public void register(UserRegisterRequest request) {
-            Set<ConstraintViolation<UserRegisterRequest>> constraintViolations = validator.validate(request);
-            if (constraintViolations.size() != 0) {
-                  throw new ConstraintViolationException(constraintViolations);
-            }
+            validationService.validate(request);
 
             if (userRepository.existsById(request.getEmail())) {
                   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists!");
