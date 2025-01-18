@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import goku.restful.dto.SessionTokenResponse;
+import goku.restful.dto.UserLoginRequest;
 import goku.restful.dto.UserRegisterRequest;
 import goku.restful.dto.WebResponse;
+import goku.restful.service.AuthService;
 import goku.restful.service.UserService;
 
 @RestController
@@ -21,5 +24,14 @@ public class UserController {
       public WebResponse<String> register(@RequestBody UserRegisterRequest request) {
             userService.register(request);
             return WebResponse.<String>builder().data("OK!").build();
+      }
+
+      @Autowired
+      private AuthService authService;
+
+      @PostMapping(path = "/auth/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+      public WebResponse<SessionTokenResponse> login(@RequestBody UserLoginRequest request) {
+            SessionTokenResponse response = authService.login(request);
+            return WebResponse.<SessionTokenResponse>builder().data(response).build();
       }
 }

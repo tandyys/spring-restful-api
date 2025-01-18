@@ -45,6 +45,6 @@ public class AuthService {
       }
 
       private Long generateExpiredAt() {
-            return System.currentTimeMillis() + (1000 * 60 * 60 * 24);
+            return System.currentTimeMillis() + (1000 * 16 * 24 * 30);
       }
 }

@@ -2,6 +2,7 @@ package goku.restful.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -16,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import goku.restful.dto.SessionTokenResponse;
+import goku.restful.dto.UserLoginRequest;
 import goku.restful.dto.UserRegisterRequest;
 import goku.restful.dto.WebResponse;
 import goku.restful.repository.UserRepository;
@@ -39,6 +42,8 @@ public class UserControllerTest {
             userRepository.deleteAll();
       }
 
+      private String apiPrefix = "/api/users";
+
       @Test
       void testRegisterSuccess() throws Exception {
             UserRegisterRequest request = new UserRegisterRequest();
@@ -46,7 +51,7 @@ public class UserControllerTest {
             request.setPassword("rahasia");
             request.setUsername("test");
 
-            mockMvc.perform(post("/api/users/register")
+            mockMvc.perform(post(apiPrefix + "/register")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -68,7 +73,7 @@ public class UserControllerTest {
             request.setPassword("");
             request.setUsername("");
 
-            mockMvc.perform(post("/api/users/register")
+            mockMvc.perform(post(apiPrefix + "/register")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -97,7 +102,7 @@ public class UserControllerTest {
             request.setUsername("testke2");
 
             mockMvc.perform(
-                        post("/api/users/register")
+                        post(apiPrefix + "/register")
                                     .accept(MediaType.APPLICATION_JSON)
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(request)))
@@ -111,5 +116,36 @@ public class UserControllerTest {
                               assertNotNull(response.getError());
                         });
 
+      }
+
+      @Test
+      void testLoginSuccess() throws Exception {
+            User user = new User();
+            user.setEmail("test@gmail.com");
+            user.setPassword(BCrypt.hashpw("rahasia", BCrypt.gensalt()));
+            user.setUsername("test");
+            userRepository.save(user);
+
+            UserLoginRequest request = new UserLoginRequest();
+            request.setEmail("test@gmail.com");
+            request.setPassword("rahasia");
+
+            mockMvc.perform(
+                        post(apiPrefix + "/auth/login")
+                                    .accept(MediaType.APPLICATION_JSON)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(request)))
+                        .andExpectAll(
+                                    status().isOk())
+                        .andDo(
+                                    result -> {
+                                          WebResponse<SessionTokenResponse> response = objectMapper.readValue(
+                                                      result.getResponse().getContentAsString(),
+                                                      new TypeReference<WebResponse<SessionTokenResponse>>() {
+                                                      });
+                                          assertNotNull(response.getData());
+                                          assertTrue(response.getData() instanceof SessionTokenResponse,
+                                                      "Data response should returning SessionTokenResponse");
+                                    });
       }
 }
